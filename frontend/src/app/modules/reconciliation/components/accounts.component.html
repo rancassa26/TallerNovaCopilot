@@ -1,0 +1,38 @@
+<div class="accounts-panel">
+  <div class="search-header">
+    <div>
+      <h2>Buscar cuentas</h2>
+      <p>Encuentra cuentas por nombre o ID y consulta sus detalles.</p>
+    </div>
+    <div class="search-actions">
+      <input
+        type="text"
+        [(ngModel)]="query"
+        placeholder="Ingrese término de búsqueda"
+        (keyup.enter)="search()"
+      />
+      <button type="button" (click)="search()" [disabled]="loading">
+        {{ loading ? 'Buscando...' : 'Buscar' }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert-error">{{ error }}</div>
+
+  <div *ngIf="accounts.length > 0" class="accounts-list">
+    <div class="account-row" *ngFor="let account of accounts" (click)="openAccount(account)">
+      <div>
+        <strong>{{ account.name }}</strong>
+        <small>ID: {{ account.id }}</small>
+      </div>
+      <div class="account-values">
+        <span>Saldo libro: {{ account.ledgerBalance | number:'1.0-2' }}</span>
+        <span>Saldo sistema: {{ account.systemBalance | number:'1.0-2' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && accounts.length === 0" class="empty-state">
+    Introduce un término y haz clic en buscar para ver cuentas.
+  </div>
+</div>

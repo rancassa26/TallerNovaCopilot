@@ -1,0 +1,28 @@
+.unauthorized-container {
+  max-width: 480px;
+  margin: 4rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.unauthorized-container h1 {
+  margin-bottom: 1rem;
+  color: #2f3848;
+}
+
+.unauthorized-container p {
+  margin-bottom: 1.5rem;
+  color: #4f5f7a;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.85rem 1.3rem;
+  background-color: #2f80ed;
+  color: white;
+  border-radius: 0.75rem;
+  text-decoration: none;
+}

@@ -1,0 +1,58 @@
+<div class="login-container">
+  <div class="login-card">
+    <h1>TallerNova - Login</h1>
+    
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          class="form-control"
+          formControlName="email"
+          [class.is-invalid]="submitted && form['email'].errors"
+          placeholder="Enter your email"
+        />
+        <div class="invalid-feedback" *ngIf="submitted && form['email'].errors">
+          <span *ngIf="form['email'].hasError('required')">Email is required</span>
+          <span *ngIf="form['email'].hasError('email')">Please enter a valid email</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          class="form-control"
+          formControlName="password"
+          [class.is-invalid]="submitted && form['password'].errors"
+          placeholder="Enter your password"
+        />
+        <div class="invalid-feedback" *ngIf="submitted && form['password'].errors">
+          <span *ngIf="form['password'].hasError('required')">Password is required</span>
+          <span *ngIf="form['password'].hasError('minlength')">Password must be at least 6 characters</span>
+        </div>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger">
+        {{ error }}
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary w-100"
+        [disabled]="loading"
+      >
+        <span *ngIf="loading" class="spinner"></span>
+        {{ loading ? 'Logging in...' : 'Login' }}
+      </button>
+    </form>
+
+    <div class="test-credentials">
+      <p><strong>Test Credentials:</strong></p>
+      <p>Admin: admin@test.com / password123</p>
+      <p>Viewer: viewer@test.com / password123</p>
+    </div>
+  </div>
+</div>

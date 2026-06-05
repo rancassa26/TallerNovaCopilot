@@ -1,0 +1,68 @@
+.account-detail-card {
+  width: 100%;
+  max-width: 920px;
+  padding: 1.5rem;
+  background: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.detail-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 1rem;
+  padding: 0.95rem 1rem;
+  background: #f8fafc;
+  border-radius: 0.9rem;
+}
+
+.label {
+  font-weight: 600;
+  color: #334155;
+}
+
+.incidents-section {
+  margin-top: 1.5rem;
+}
+
+.incident-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.incident-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.9rem;
+  background: #f8fafc;
+}
+
+.incident-row p {
+  margin: 0.25rem 0 0;
+  color: #475569;
+}
+
+.empty-state {
+  padding: 1rem;
+  color: #64748b;
+}
+
+.loading,
+.error-message {
+  margin-top: 1rem;
+  color: #475569;
+}
+
+.error-message {
+  color: #b91c1c;
+}

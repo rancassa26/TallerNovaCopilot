@@ -1,0 +1,28 @@
+<div class="dashboard-card">
+  <h2>Dashboard de conciliaciones</h2>
+
+  <div *ngIf="loading" class="loading">Cargando métricas...</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <div *ngIf="dashboard" class="metrics-grid">
+    <div class="metric-card">
+      <span class="metric-label">Conciliaciones</span>
+      <span class="metric-value">{{ dashboard.totalReconciliations }}</span>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Cuentas</span>
+      <span class="metric-value">{{ dashboard.totalAccounts }}</span>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Incidentes</span>
+      <span class="metric-value">{{ dashboard.totalIncidents }}</span>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Diferencia total</span>
+      <span class="metric-value">{{ dashboard.totalDifference | number:'1.0-2' }}</span>
+    </div>
+  </div>
+</div>

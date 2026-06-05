@@ -1,0 +1,45 @@
+<div class="account-detail-card">
+  <h2>Detalle de cuenta</h2>
+
+  <div *ngIf="loading" class="loading">Cargando detalles...</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <div *ngIf="account" class="detail-grid">
+    <div class="detail-row">
+      <span class="label">ID</span>
+      <span>{{ account.id }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Nombre</span>
+      <span>{{ account.name }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Saldo libro</span>
+      <span>{{ account.ledgerBalance | number:'1.0-2' }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Saldo sistema</span>
+      <span>{{ account.systemBalance | number:'1.0-2' }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Diferencia</span>
+      <span>{{ account.difference | number:'1.0-2' }}</span>
+    </div>
+
+    <div class="incidents-section">
+      <h3>Incidentes</h3>
+      <div *ngIf="account.incidents.length === 0" class="empty-state">
+        No hay incidentes registrados.
+      </div>
+      <div *ngIf="account.incidents.length > 0" class="incident-list">
+        <div *ngFor="let incident of account.incidents" class="incident-row">
+          <div>
+            <strong>{{ incident.type }}</strong>
+            <p>{{ incident.description }}</p>
+          </div>
+          <span>{{ incident.amount | number:'1.0-2' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

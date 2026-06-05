@@ -1,0 +1,29 @@
+<div class="export-panel">
+  <h2>Exportar conciliación</h2>
+
+  <div class="field">
+    <label for="reconciliationId">ID de conciliación (opcional)</label>
+    <input
+      id="reconciliationId"
+      type="text"
+      [value]="reconciliationId"
+      (input)="reconciliationId = $event.target.value"
+      placeholder="Ingrese ID si desea exportar una conciliación específica"
+    />
+  </div>
+
+  <div class="field">
+    <label for="format">Formato</label>
+    <select id="format" [(ngModel)]="format">
+      <option value="json">JSON</option>
+      <option value="csv">CSV</option>
+    </select>
+  </div>
+
+  <button type="button" (click)="onExport()" [disabled]="loading">
+    {{ loading ? 'Generando...' : 'Exportar' }}
+  </button>
+
+  <div class="message success" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="message error" *ngIf="error">{{ error }}</div>
+</div>

@@ -1,0 +1,48 @@
+<div class="incidents-card">
+  <div class="incidents-header">
+    <div>
+      <h2>Incidentes</h2>
+      <p>Consulta los incidentes por conciliación o todos los incidentes registrados.</p>
+    </div>
+    <div class="search-group">
+      <input
+        type="text"
+        [(ngModel)]="reconciliationId"
+        placeholder="ID de conciliación (opcional)"
+        (keyup.enter)="search()"
+      />
+      <button type="button" (click)="search()" [disabled]="loading">
+        {{ loading ? 'Buscando...' : 'Buscar' }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert-error">{{ error }}</div>
+
+  <table *ngIf="incidents.length > 0" class="incidents-table">
+    <thead>
+      <tr>
+        <th>Reconciliación</th>
+        <th>Cuenta</th>
+        <th>Incidente</th>
+        <th>Tipo</th>
+        <th>Descripción</th>
+        <th>Importe</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let incident of incidents">
+        <td>{{ incident.reconciliationId }}</td>
+        <td>{{ incident.accountName }}</td>
+        <td>{{ incident.incidentId }}</td>
+        <td>{{ incident.type }}</td>
+        <td>{{ incident.description }}</td>
+        <td>{{ incident.amount | number:'1.2-2' }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && incidents.length === 0" class="empty-state">
+    Ejecuta una búsqueda para mostrar incidentes.
+  </div>
+</div>

@@ -1,0 +1,167 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm install
+
+      - name: Run backend lint
+        run: |
+          cd backend
+          npm run lint
+
+      - name: Run backend unit tests
+        run: |
+          cd backend
+          npm test -- --runInBand
+
+      - name: Generate backend coverage
+        run: |
+          cd backend
+          npm run test:cov -- --watch=false --coverageDirectory=coverage/backend
+
+      - name: Run backend contract tests
+        run: |
+          cd backend
+          npm run test:e2e -- --runInBand
+
+      - name: Build backend
+        run: |
+          cd backend
+          npm run build
+
+      - name: Package backend build
+        run: |
+          cd backend
+          zip -r ../backend-dist.zip dist
+
+      - name: Upload backend artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-dist
+          path: backend-dist.zip
+
+      - name: Run SonarQube analysis
+        if: secrets.SONAR_TOKEN != ''
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd backend
+          echo "Sonar analysis placeholder - configure sonar-scanner here"
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Run frontend lint
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Run frontend unit tests
+        run: |
+          cd frontend
+          npm test -- --watch=false --no-progress
+
+      - name: Generate frontend coverage
+        run: |
+          cd frontend
+          npm run test:coverage -- --watch=false --no-progress
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build -- --configuration production
+
+      - name: Package frontend build
+        run: |
+          cd frontend
+          zip -r ../frontend-dist.zip dist
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-dist
+          path: frontend-dist.zip
+
+      - name: Run SonarQube analysis
+        if: secrets.SONAR_TOKEN != ''
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd frontend
+          echo "Sonar analysis placeholder - configure sonar-scanner here"
+
+  deploy_qa:
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download backend artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-dist
+          path: backend-dist
+
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-dist
+          path: frontend-dist
+
+      - name: Deploy to QA
+        if: secrets.QA_DEPLOY_TOKEN != ''
+        env:
+          QA_DEPLOY_TOKEN: ${{ secrets.QA_DEPLOY_TOKEN }}
+        run: |
+          echo "Deploying backend and frontend artifacts to QA..."
+          echo "Backend artifact files:"
+          ls backend-dist || true
+          echo "Frontend artifact files:"
+          ls frontend-dist || true
+          echo "Using QA_DEPLOY_TOKEN to perform deployment. Replace this placeholder with actual deployment commands."
+
+      - name: Skip QA deployment
+        if: secrets.QA_DEPLOY_TOKEN == ''
+        run: |
+          echo "QA deployment skipped because QA_DEPLOY_TOKEN is not configured."
