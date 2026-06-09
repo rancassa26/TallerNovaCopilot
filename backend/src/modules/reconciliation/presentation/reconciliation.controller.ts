@@ -7,13 +7,11 @@ import {
   Query,
   HttpCode,
   HttpStatus,
-  UseFilters,
   UseInterceptors,
   UseGuards,
 } from '@nestjs/common';
 import { JwtGuard } from '../../../common/guards/jwt.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
-import { GlobalExceptionFilter } from '../../../common/filters/exception.filter';
 import { CorrelationIdInterceptor } from '../../../common/interceptors/correlation-id.interceptor';
 import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor';
 import { CorrelationId, Roles } from '../../../common/decorators/index';
@@ -31,7 +29,6 @@ import { BaseResponseDTO } from '../../../common/dtos/base-response.dto';
 
 @Controller('reconciliation')
 @UseGuards(JwtGuard, RolesGuard)
-@UseFilters(GlobalExceptionFilter)
 @UseInterceptors(CorrelationIdInterceptor, ResponseInterceptor)
 export class ReconciliationController {
   constructor(

@@ -6,8 +6,7 @@
     <input
       id="reconciliationId"
       type="text"
-      [value]="reconciliationId"
-      (input)="reconciliationId = $event.target.value"
+      [(ngModel)]="reconciliationId"
       placeholder="Ingrese ID si desea exportar una conciliación específica"
     />
   </div>

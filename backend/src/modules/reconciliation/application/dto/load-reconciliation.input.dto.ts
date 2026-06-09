@@ -4,19 +4,19 @@ import { Type } from 'class-transformer';
 export class LoadReconciliationAccountDto {
   @IsString()
   @IsNotEmpty()
-  id: string;
+  id!: string;
 
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @Type(() => Number)
   @IsNumber()
-  ledgerBalance: number;
+  ledgerBalance!: number;
 
   @Type(() => Number)
   @IsNumber()
-  systemBalance: number;
+  systemBalance!: number;
 
   @IsOptional()
   @IsArray()
@@ -28,28 +28,28 @@ export class LoadReconciliationAccountDto {
 export class LoadReconciliationIncidentDto {
   @IsString()
   @IsNotEmpty()
-  id: string;
+  id!: string;
 
   @IsString()
   @IsNotEmpty()
-  type: string;
+  type!: string;
 
   @IsString()
   @IsNotEmpty()
-  description: string;
+  description!: string;
 
   @Type(() => Number)
   @IsNumber()
-  amount: number;
+  amount!: number;
 }
 
 export class LoadReconciliationInputDto {
   @IsString()
   @IsNotEmpty()
-  source: string;
+  source!: string;
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => LoadReconciliationAccountDto)
-  accounts: LoadReconciliationAccountDto[];
+  accounts!: LoadReconciliationAccountDto[];
 }

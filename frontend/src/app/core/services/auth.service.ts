@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClientService } from './http-client.service';
 import { LoggerService } from './logger.service';
 import { CorrelationIdService } from './correlation-id.service';
-import { User, LoginRequest, LoginResponse, Role } from '../models/index';
+import { User, LoginResponse, Role } from '../models/index';
 
 /**
  * AuthService - Manages authentication state and operations

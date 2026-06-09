@@ -22,8 +22,8 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot,
+    _route: ActivatedRouteSnapshot,
+    _state: RouterStateSnapshot,
   ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     if (this.authService.isTokenValid()) {
       return true;
@@ -31,7 +31,7 @@ export class AuthGuard implements CanActivate {
 
     // Redirect to login
     this.router.navigate(['/login'], {
-      queryParams: { returnUrl: state.url },
+      queryParams: { returnUrl: _state.url },
     });
     return false;
   }

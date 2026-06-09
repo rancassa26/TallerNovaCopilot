@@ -31,7 +31,7 @@ export class HttpClientService {
       .pipe(
         map((response) => {
           this.logger.log(`GET ${endpoint} - Success`, response.correlationId);
-          return response.data;
+          return response.data as T;
         }),
         catchError((error) => this.handleError(error)),
       );
@@ -46,7 +46,7 @@ export class HttpClientService {
       .pipe(
         map((response) => {
           this.logger.log(`POST ${endpoint} - Success`, response.correlationId);
-          return response.data;
+          return response.data as T;
         }),
         catchError((error) => this.handleError(error)),
       );
@@ -61,7 +61,7 @@ export class HttpClientService {
       .pipe(
         map((response) => {
           this.logger.log(`PUT ${endpoint} - Success`, response.correlationId);
-          return response.data;
+          return response.data as T;
         }),
         catchError((error) => this.handleError(error)),
       );
@@ -76,7 +76,7 @@ export class HttpClientService {
       .pipe(
         map((response) => {
           this.logger.log(`PATCH ${endpoint} - Success`, response.correlationId);
-          return response.data;
+          return response.data as T;
         }),
         catchError((error) => this.handleError(error)),
       );
@@ -91,7 +91,7 @@ export class HttpClientService {
       .pipe(
         map((response) => {
           this.logger.log(`DELETE ${endpoint} - Success`, response.correlationId);
-          return response.data;
+          return response.data as T;
         }),
         catchError((error) => this.handleError(error)),
       );

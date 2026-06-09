@@ -5,10 +5,10 @@ import { LoadReconciliationAccountDto, LoadReconciliationIncidentDto } from '../
 export class LoadReconciliationDto {
   @IsString()
   @IsNotEmpty()
-  source: string;
+  source!: string;
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => LoadReconciliationAccountDto)
-  accounts: LoadReconciliationAccountDto[];
+  accounts!: LoadReconciliationAccountDto[];
 }

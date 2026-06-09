@@ -1,0 +1,1 @@
+{"ast":null,"code":"/**\n * Role enum - Defines available roles in the system\n */\nexport var Role = /*#__PURE__*/function (Role) {\n  Role[\"ADMIN\"] = \"ADMIN\";\n  Role[\"VIEWER\"] = \"VIEWER\";\n  return Role;\n}(Role || {});","map":null,"metadata":{},"sourceType":"module","externalDependencies":[]}

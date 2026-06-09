@@ -5,20 +5,20 @@ import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
  */
 export class LoginDto {
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(6)
-  password: string;
+  password!: string;
 }
 
 /**
  * LoginResponseDto - Response DTO for login endpoint
  */
 export class LoginResponseDto {
-  token: string;
-  user: {
+  token!: string;
+  user!: {
     id: string;
     email: string;
     roles: string[];

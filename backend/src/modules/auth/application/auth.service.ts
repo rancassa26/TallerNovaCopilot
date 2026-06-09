@@ -22,7 +22,7 @@ export class AuthService {
     email: string,
     password: string,
     correlationId: string,
-  ): Promise<{ token: string; user: Partial<User> }> {
+  ): Promise<{ token: string; user: { id: string; email: string; roles: string[] } }> {
     // Find user by email
     const user = await this.userRepository.findByEmail(email);
 

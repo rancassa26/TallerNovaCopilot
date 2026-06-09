@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClientService } from '../../../core/services/http-client.service';
 import { LoggerService } from '../../../core/services/logger.service';
-import { ExportResult } from '../../core/models/index';
+import { ExportResult } from '../../../core/models/index';
 
 @Injectable({
   providedIn: 'root',

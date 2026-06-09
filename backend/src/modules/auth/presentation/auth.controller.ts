@@ -5,12 +5,10 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
-  UseFilters,
   UseInterceptors,
 } from '@nestjs/common';
 import { JwtGuard } from '../../../common/guards/jwt.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
-import { GlobalExceptionFilter } from '../../../common/filters/exception.filter';
 import { CorrelationIdInterceptor } from '../../../common/interceptors/correlation-id.interceptor';
 import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor';
 import { CorrelationId, Public } from '../../../common/decorators/index';
@@ -22,7 +20,6 @@ import { BaseResponseDTO } from '../../../common/dtos/base-response.dto';
  * AuthController - Presentation layer for authentication
  */
 @Controller('auth')
-@UseFilters(GlobalExceptionFilter)
 @UseInterceptors(CorrelationIdInterceptor, ResponseInterceptor)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
