@@ -1,46 +1,48 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, LoggerService as NestLoggerService } from '@nestjs/common';
+import { LoggerStorage } from './logger.storage';
 
 /**
- * LoggerService - Structured JSON logging with correlation ID support
+ * LoggerService - Implementación de logging estructurado JSON para NestJS.
+ * Recupera automáticamente el correlationId del contexto de ejecución.
  */
 @Injectable()
-export class LoggerService {
-  private context: string = 'TallerNova';
+export class LoggerService implements NestLoggerService {
+  private context = 'TallerNova-Backend';
 
-  setContext(context: string) {
-    this.context = context;
+  log(message: any, context?: string) {
+    this.printLog('INFO', message, context);
   }
 
-  private formatLog(
-    level: string,
-    message: string,
-    correlationId?: string,
-    metadata?: any,
-  ): string {
-    const logObj = {
+  error(message: any, trace?: string, context?: string) {
+    this.printLog('ERROR', message, context, { trace });
+  }
+
+  warn(message: any, context?: string) {
+    this.printLog('WARN', message, context);
+  }
+
+  debug(message: any, context?: string) {
+    this.printLog('DEBUG', message, context);
+  }
+
+  private printLog(level: string, message: any, context?: string, extra?: any) {
+    const store = LoggerStorage.getStore();
+    const correlationId = store?.get('correlationId');
+
+    const logEntry = {
       timestamp: new Date().toISOString(),
       level,
-      context: this.context,
-      message,
+      context: context || this.context,
+      message: typeof message === 'object' ? message.message : message,
       correlationId,
-      ...metadata,
+      ...(typeof message === 'object' ? message : {}),
+      ...extra,
     };
-    return JSON.stringify(logObj);
-  }
 
-  log(message: string, correlationId?: string, metadata?: any) {
-    console.log(this.formatLog('INFO', message, correlationId, metadata));
-  }
-
-  error(message: string, correlationId?: string, metadata?: any) {
-    console.error(this.formatLog('ERROR', message, correlationId, metadata));
-  }
-
-  warn(message: string, correlationId?: string, metadata?: any) {
-    console.warn(this.formatLog('WARN', message, correlationId, metadata));
-  }
-
-  debug(message: string, correlationId?: string, metadata?: any) {
-    console.debug(this.formatLog('DEBUG', message, correlationId, metadata));
+    if (level === 'ERROR') {
+      console.error(JSON.stringify(logEntry));
+    } else {
+      console.log(JSON.stringify(logEntry));
+    }
   }
 }

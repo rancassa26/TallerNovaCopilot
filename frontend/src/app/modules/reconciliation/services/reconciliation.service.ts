@@ -21,8 +21,20 @@ export class ReconciliationService {
     return this.httpClient.get<Account>(`/reconciliation/accounts/${encodeURIComponent(accountId)}`);
   }
 
-  getIncidents(reconciliationId?: string): Observable<IncidentResult[]> {
-    const query = reconciliationId ? `?reconciliationId=${encodeURIComponent(reconciliationId)}` : '';
-    return this.httpClient.get<IncidentResult[]>(`/reconciliation/incidents${query}`);
+  getIncidents(reconciliationId?: string, status?: string): Observable<IncidentResult[]> {
+    const params: string[] = [];
+    if (reconciliationId) params.push(`reconciliationId=${encodeURIComponent(reconciliationId)}`);
+    if (status) params.push(`status=${encodeURIComponent(status)}`);
+    
+    const queryString = params.length > 0 ? `?${params.join('&')}` : '';
+    return this.httpClient.get<IncidentResult[]>(`/reconciliation/incidents${queryString}`);
+  }
+
+  loadReconciliation(data: any): Observable<any> {
+    return this.httpClient.post<any>('/reconciliation/load', data);
+  }
+
+  updateIncidentStatus(incidentId: string, status: string): Observable<any> {
+    return this.httpClient.patch<any>(`/reconciliation/incidents/${encodeURIComponent(incidentId)}/status`, { status });
   }
 }

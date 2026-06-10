@@ -1,0 +1,22 @@
+.load-container {
+  max-width: 800px;
+  margin: 2rem auto;
+
+  .upload-zone {
+    background-color: #f8fbff;
+    border-color: #cfe2ff !important;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: #f1f7ff;
+      border-color: #0d6efd !important;
+    }
+  }
+
+  .file-info {
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+}

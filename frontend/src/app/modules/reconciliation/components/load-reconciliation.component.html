@@ -1,0 +1,38 @@
+<div class="load-container">
+  <div class="card shadow-sm border-0 p-4">
+    <h2 class="mb-4">Cargar Nueva Conciliación</h2>
+    <p class="text-secondary">Seleccione un archivo JSON para importar los datos de cuentas e incidentes al sistema.</p>
+
+    <div class="upload-zone my-4 p-5 text-center border border-2 border-dashed rounded">
+      <input type="file" (change)="onFileSelected($event)" accept=".json" class="d-none" #fileInput>
+      <div *ngIf="!fileName">
+        <i class="bi bi-file-earmark-arrow-up display-4 text-primary"></i>
+        <p class="mt-3">Arrastra el archivo aquí o haz clic para buscar</p>
+        <button (click)="fileInput.click()" class="btn btn-outline-primary">Seleccionar Archivo</button>
+      </div>
+      <div *ngIf="fileName" class="file-info d-flex align-items-center justify-content-center">
+        <i class="bi bi-file-check-fill text-success fs-2 me-2"></i>
+        <span class="fw-bold">{{ fileName }}</span>
+        <button (click)="fileName = ''; fileContent = null" class="btn btn-link text-danger ms-2"><i class="bi bi-trash"></i></button>
+      </div>
+    </div>
+
+    <div *ngIf="error" class="alert alert-danger mb-3">
+      <i class="bi bi-exclamation-circle me-2"></i>{{ error }}
+    </div>
+
+    <div *ngIf="successMessage" class="alert alert-success mb-3">
+      <i class="bi bi-check-circle me-2"></i>{{ successMessage }}
+    </div>
+
+    <div class="d-flex justify-content-end">
+      <button 
+        class="btn btn-primary px-5 py-2 fw-bold" 
+        [disabled]="loading || !fileContent" 
+        (click)="onUpload()">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+        {{ loading ? 'PROCESANDO...' : 'CARGAR DATOS' }}
+      </button>
+    </div>
+  </div>
+</div>

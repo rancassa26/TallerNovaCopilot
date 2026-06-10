@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { randomUUID } from 'crypto';
+import { LoggerStorage } from '../logger/logger.storage';
 
 /**
  * CorrelationIdInterceptor - Generates or extracts correlation ID for all requests
@@ -19,7 +20,13 @@ export class CorrelationIdInterceptor implements NestInterceptor {
     const correlationId = request.headers['x-correlation-id'] || this.generateId();
     request.correlationId = correlationId;
 
-    return next.handle();
+    // Envolvemos la ejecución en el almacenamiento asíncrono
+    const store = new Map().set('correlationId', correlationId);
+    return new Observable((observer) => {
+      LoggerStorage.run(store, () => {
+        next.handle().subscribe(observer);
+      });
+    });
   }
 
   private generateId(): string {

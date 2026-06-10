@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Patch,
   Body,
   Param,
   Query,
@@ -22,9 +23,11 @@ import { GetAccountDetailUseCase } from '../application/get-account-detail.use-c
 import { GetDashboardUseCase } from '../application/get-dashboard.use-case';
 import { GetIncidentsUseCase } from '../application/get-incidents.use-case';
 import { ExportResultsUseCase } from '../application/export-results.use-case';
+import { ResolveIncidentUseCase } from '../application/resolve-incident.use-case';
 import { LoadReconciliationDto } from './dtos/load-reconciliation.dto';
 import { ValidateReconciliationDto } from './dtos/validate-reconciliation.dto';
 import { ExportResultsDto } from './dtos/export-results.dto';
+import { ResolveIncidentDto } from './dtos/resolve-incident.dto';
 import { BaseResponseDTO } from '../../../common/dtos/base-response.dto';
 
 @Controller('reconciliation')
@@ -39,6 +42,7 @@ export class ReconciliationController {
     private readonly getDashboardUseCase: GetDashboardUseCase,
     private readonly getIncidentsUseCase: GetIncidentsUseCase,
     private readonly exportResultsUseCase: ExportResultsUseCase,
+    private readonly resolveIncidentUseCase: ResolveIncidentUseCase,
   ) {}
 
   @Roles('ADMIN')
@@ -128,13 +132,35 @@ export class ReconciliationController {
   @Get('incidents')
   @HttpCode(HttpStatus.OK)
   async getIncidents(
-    @Query('reconciliationId') reconciliationId: string,
+    @Query('reconciliationId') reconciliationId?: string,
+    @Query('status') status?: string,
     @CorrelationId() correlationId: string,
   ): Promise<BaseResponseDTO<any>> {
-    const result = await this.getIncidentsUseCase.execute(reconciliationId);
+    const result = await this.getIncidentsUseCase.execute(reconciliationId, status);
 
     return BaseResponseDTO.success(
       'Incident list retrieved successfully',
+      result,
+      correlationId,
+    );
+  }
+
+  @Roles('ADMIN')
+  @Patch('incidents/:id/status')
+  @HttpCode(HttpStatus.OK)
+  async resolveIncident(
+    @Param('id') incidentId: string,
+    @Body() body: ResolveIncidentDto,
+    @CorrelationId() correlationId: string,
+  ): Promise<BaseResponseDTO<any>> {
+    const result = await this.resolveIncidentUseCase.execute(
+      incidentId,
+      body.status,
+      correlationId,
+    );
+
+    return BaseResponseDTO.success(
+      'Incident status updated successfully',
       result,
       correlationId,
     );

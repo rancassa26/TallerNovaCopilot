@@ -1,17 +1,51 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { LoadReconciliationUseCase } from './load-reconciliation.use-case';
-import { InMemoryReconciliationRepository } from '../infrastructure/in-memory-reconciliation.repository';
+import { SchemaValidatorService } from '../infrastructure/schema-validator.service';
+import { LoggerService } from '../../../common/logger/logger.service';
+import { RECONCILIATION_SCHEMA } from '../domain/schemas/reconciliation.schema';
 import { LoadReconciliationInputDto } from './dto/load-reconciliation.input.dto';
+import { ValidationException } from '../../../common/exceptions/base.exception';
 
 describe('LoadReconciliationUseCase', () => {
   let useCase: LoadReconciliationUseCase;
-  let repository: InMemoryReconciliationRepository;
+  let repository: any;
+  let schemaValidator: any;
+  let logger: any;
 
-  beforeEach(() => {
-    repository = new InMemoryReconciliationRepository();
-    useCase = new LoadReconciliationUseCase(repository);
+  beforeEach(async () => {
+    repository = {
+      save: jest.fn(),
+    };
+    schemaValidator = {
+      validate: jest.fn(),
+    };
+    logger = {
+      log: jest.fn(),
+      error: jest.fn(),
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        LoadReconciliationUseCase,
+        {
+          provide: 'IReconciliationRepository',
+          useValue: repository,
+        },
+        {
+          provide: SchemaValidatorService,
+          useValue: schemaValidator,
+        },
+        {
+          provide: LoggerService,
+          useValue: logger,
+        },
+      ],
+    }).compile();
+
+    useCase = module.get<LoadReconciliationUseCase>(LoadReconciliationUseCase);
   });
 
-  it('should create and persist a reconciliation summary', async () => {
+  it('should validate the input against schema and persist data', async () => {
     const input: LoadReconciliationInputDto = {
       source: 'test-file.json',
       accounts: [
@@ -31,17 +65,26 @@ describe('LoadReconciliationUseCase', () => {
         },
       ],
     };
+    const correlationId = 'corr-123';
+    const mockResult = { reconciliationId: 'REC-001', ...input };
+    repository.save.mockResolvedValue(mockResult);
 
-    const result = await useCase.execute(input, 'correlation-123');
+    const result = await useCase.execute(input, correlationId);
 
-    expect(result.reconciliationId).toBeDefined();
-    expect(result.source).toBe('test-file.json');
-    expect(result.totalAccounts).toBe(1);
-    expect(result.totalIncidents).toBe(1);
-    expect(result.totalDifference).toBe(-50);
+    expect(schemaValidator.validate).toHaveBeenCalledWith(RECONCILIATION_SCHEMA, input, correlationId);
+    expect(repository.save).toHaveBeenCalledWith(input);
+    expect(result).toEqual(mockResult);
+    expect(logger.log).toHaveBeenCalled();
+  });
 
-    const loaded = await repository.findById(result.reconciliationId);
-    expect(loaded).not.toBeNull();
-    expect(loaded?.accounts[0].name).toBe('Cash Account');
+  it('should throw ValidationException and not persist if schema validation fails', async () => {
+    const invalidData = { source: '' };
+    const correlationId = 'corr-err';
+    schemaValidator.validate.mockImplementation(() => {
+      throw new ValidationException('Invalid schema', correlationId);
+    });
+
+    await expect(useCase.execute(invalidData, correlationId)).rejects.toThrow(ValidationException);
+    expect(repository.save).not.toHaveBeenCalled();
   });
 });

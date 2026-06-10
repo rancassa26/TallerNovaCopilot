@@ -1,65 +1,32 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { randomUUID } from 'crypto';
-import { Reconciliation } from '../domain/reconciliation.entity';
-import { Account, AccountIncident } from '../domain/account.entity';
+import { LoggerService } from '../../../common/logger/logger.service';
+import { SchemaValidatorService } from '../infrastructure/schema-validator.service';
+import { RECONCILIATION_SCHEMA } from '../domain/schemas/reconciliation.schema';
 import { IReconciliationRepository } from '../domain/reconciliation.repository.interface';
-import { LoadReconciliationInputDto } from './dto/load-reconciliation.input.dto';
-
-export interface LoadReconciliationResult {
-  reconciliationId: string;
-  source: string;
-  totalAccounts: number;
-  totalDifference: number;
-  totalIncidents: number;
-}
 
 @Injectable()
 export class LoadReconciliationUseCase {
   constructor(
     @Inject('IReconciliationRepository')
     private readonly reconciliationRepository: IReconciliationRepository,
+    private readonly schemaValidator: SchemaValidatorService,
+    private readonly logger: LoggerService,
   ) {}
 
-  async execute(
-    input: LoadReconciliationInputDto,
-    correlationId: string,
-  ): Promise<LoadReconciliationResult> {
-    const accounts = input.accounts.map((accountDto) => {
-      const incidents = (accountDto.incidents ?? []).map(
-        (incidentDto) =>
-          new AccountIncident(
-            incidentDto.id,
-            accountDto.id,
-            incidentDto.type,
-            incidentDto.description,
-            incidentDto.amount,
-          ),
-      );
+  async execute(data: any, correlationId: string): Promise<any> {
+    this.logger.log('Starting LoadReconciliationUseCase validation', correlationId);
 
-      return new Account(
-        accountDto.id,
-        accountDto.name,
-        accountDto.ledgerBalance,
-        accountDto.systemBalance,
-        incidents,
-      );
-    });
+    // 1. Validar integridad estructural con JSON Schema
+    this.schemaValidator.validate(RECONCILIATION_SCHEMA, data, correlationId);
 
-    const reconciliation = new Reconciliation(
-      randomUUID(),
-      input.source,
-      new Date(),
-      accounts,
-    );
+    this.logger.log('JSON Schema validation passed', correlationId);
 
-    await this.reconciliationRepository.create(reconciliation);
+    // 2. Lógica de persistencia (Simulada para este paso)
+    // Aquí se transformaría el DTO a Entidad de Dominio y se guardaría
+    const result = await this.reconciliationRepository.save(data);
 
-    return {
-      reconciliationId: reconciliation.id,
-      source: reconciliation.source,
-      totalAccounts: reconciliation.totalAccounts,
-      totalDifference: reconciliation.totalDifference,
-      totalIncidents: reconciliation.totalIncidents,
-    };
+    this.logger.log(`Reconciliation from ${data.source} loaded successfully`, correlationId);
+    
+    return result;
   }
 }

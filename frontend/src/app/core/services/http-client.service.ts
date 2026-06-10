@@ -3,7 +3,6 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { BaseResponseDTO } from '../models/index';
-import { CorrelationIdService } from './correlation-id.service';
 import { LoggerService } from './logger.service';
 
 /**
@@ -18,16 +17,13 @@ export class HttpClientService {
 
   constructor(
     private http: HttpClient,
-    private correlationIdService: CorrelationIdService,
     private logger: LoggerService,
   ) {}
 
   get<T>(endpoint: string): Observable<T> {
     const url = `${this.apiUrl}${endpoint}`;
     return this.http
-      .get<BaseResponseDTO<T>>(url, {
-        headers: this.getHeaders(),
-      })
+      .get<BaseResponseDTO<T>>(url)
       .pipe(
         map((response) => {
           this.logger.log(`GET ${endpoint} - Success`, response.correlationId);
@@ -97,11 +93,6 @@ export class HttpClientService {
       );
   }
 
-  private getHeaders(): any {
-    return {
-      'X-Correlation-ID': this.correlationIdService.getCorrelationId(),
-    };
-  }
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An error occurred';
