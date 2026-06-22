@@ -93,18 +93,38 @@ export class HttpClientService {
       );
   }
 
+  private getHeaders(): any {
+    // Retorna un objeto vacío para dejar que los interceptores manejen los headers globales
+    return {};
+  }
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An error occurred';
+    let correlationId: string | undefined;
+
     if (error.error instanceof ErrorEvent) {
+      // Error del lado del cliente o de red
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
-      if (error.error && error.error.message) {
-        errorMessage = error.error.message;
+      // Error del lado del servidor (HTTP 4xx/5xx)
+      if (error.error && typeof error.error === 'object') {
+        // Intentamos extraer el mensaje y el correlationId del cuerpo estructurado (BaseResponseDTO)
+        errorMessage = error.error.message || `Error Code: ${error.status}`;
+        correlationId = error.error.correlationId;
+      } else {
+        errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
       }
     }
-    this.logger.error(errorMessage);
-    return throwError(() => new Error(errorMessage));
+
+    // Logueamos el error incluyendo el correlationId para trazabilidad técnica
+    this.logger.error(errorMessage, correlationId);
+
+    // Retornamos un objeto estructurado en lugar de un Error genérico para no "esconder" metadata
+    return throwError(() => ({
+      message: errorMessage,
+      status: error.status,
+      correlationId: correlationId,
+      originalError: error
+    }));
   }
 }

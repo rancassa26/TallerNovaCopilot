@@ -1,30 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
-import { ValidationException } from '../../../common/exceptions/base.exception';
 
 @Injectable()
 export class SchemaValidatorService {
-  private ajv: Ajv;
+  private ajv = new Ajv();
 
-  constructor() {
-    this.ajv = new Ajv({ allErrors: true, verbose: true });
-    addFormats(this.ajv);
-  }
-
-  validate(schema: any, data: any, correlationId: string): void {
+  /**
+   * Valida un objeto contra un esquema JSON.
+   * @throws BadRequestException si la validación falla.
+   */
+  validate(schema: object, data: any, correlationId?: string): void {
     const validate = this.ajv.compile(schema);
-    const valid = validate(data);
+    const isValid = validate(data);
 
-    if (!valid) {
-      const errors = validate.errors
-        ?.map((err) => `${err.instancePath} ${err.message}`)
-        .join(', ');
-      
-      throw new ValidationException(
-        `JSON Schema validation failed: ${errors}`,
+    if (!isValid) {
+      const errors = validate.errors?.map(err => `${err.instancePath} ${err.message}`).join(', ');
+      throw new BadRequestException({
+        message: `Error de validación de esquema: ${errors}`,
         correlationId
-      );
+      });
     }
   }
 }

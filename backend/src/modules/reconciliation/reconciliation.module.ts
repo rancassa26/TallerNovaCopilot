@@ -1,29 +1,29 @@
 import { Module } from '@nestjs/common';
-import { LoadReconciliationUseCase } from './application/load-reconciliation.use-case';
-import { ValidateReconciliationUseCase } from './application/validate-reconciliation.use-case';
-import { SearchAccountsUseCase } from './application/search-accounts.use-case';
-import { GetAccountDetailUseCase } from './application/get-account-detail.use-case';
-import { GetDashboardUseCase } from './application/get-dashboard.use-case';
-import { GetIncidentsUseCase } from './application/get-incidents.use-case';
-import { ExportResultsUseCase } from './application/export-results.use-case';
 import { ReconciliationController } from './presentation/reconciliation.controller';
-import { InMemoryReconciliationRepository } from './infrastructure/in-memory-reconciliation.repository';
+import { LoadReconciliationUseCase } from './application/load-reconciliation.use-case';
+import { SchemaValidatorService } from './infrastructure/schema-validator.service';
+import { AuthModule } from '../auth/auth.module';
+import { LoggerModule } from '../../common/logger/logger.module';
 
 @Module({
+  imports: [
+    AuthModule,    // Para acceder al AuditUseCase
+    LoggerModule,  // Para el LoggerService global
+  ],
   controllers: [ReconciliationController],
   providers: [
     LoadReconciliationUseCase,
-    ValidateReconciliationUseCase,
-    SearchAccountsUseCase,
-    GetAccountDetailUseCase,
-    GetDashboardUseCase,
-    GetIncidentsUseCase,
-    ExportResultsUseCase,
-    InMemoryReconciliationRepository,
+    SchemaValidatorService,
     {
       provide: 'IReconciliationRepository',
-      useClass: InMemoryReconciliationRepository,
-    },
+      // Placeholder: Aquí se inyectaría la implementación real (TypeORM/Mongoose)
+      useClass: class { 
+        async save(data: any) { 
+          return { id: Date.now().toString(), ...data }; 
+        } 
+      }
+    }
   ],
+  exports: [LoadReconciliationUseCase],
 })
 export class ReconciliationModule {}

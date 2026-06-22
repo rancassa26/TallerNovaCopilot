@@ -30,6 +30,12 @@ export class AuthService {
     return !!this.getToken();
   }
 
+  public logout(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    this.userSubject.next(null);
+    // Aquí podrías añadir una redirección limpia usando el Router si fuera necesario
+  }
+
   private loadUserFromStorage(): void {
     const token = this.getToken();
     if (token) {

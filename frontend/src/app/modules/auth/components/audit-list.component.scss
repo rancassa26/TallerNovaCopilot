@@ -1,0 +1,111 @@
+.audit-container {
+  padding: 2rem;
+  max-width: 1300px;
+  margin: 0 auto;
+
+  .header-section {
+    h1 {
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.25rem;
+    }
+    p {
+      color: #6c757d;
+    }
+  }
+}
+
+table {
+  width: 100%;
+}
+
+/* Ajuste de anchos de columna para mejor legibilidad */
+.mat-column-timestamp { width: 180px; }
+.mat-column-userId { width: 150px; }
+.mat-column-action { width: 220px; }
+.mat-column-actions { width: 60px; text-align: right; }
+
+/* Estilos de Badges para Acciones */
+.badge {
+  padding: 0.5em 0.75em;
+  font-weight: 500;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+}
+
+.bg-primary { background-color: #e7f1ff; color: #0056b3; border: 1px solid #cfe2ff; }
+.bg-danger { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+
+/* Animación de Expansión de Filas */
+.detail-row {
+  overflow: hidden;
+  
+  // Cuando la fila no está oculta, disparamos la animación
+  &:not([hidden]) {
+    display: table-row !important; // Asegura el comportamiento de tabla
+    
+    td {
+      animation: slideInDown 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    background-color: transparent;
+  }
+}
+
+/* Contenedor para el botón de copia */
+.json-container {
+  position: relative;
+
+  .copy-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    color: #d4d4d4;
+    background-color: rgba(255, 255, 255, 0.1);
+    z-index: 10;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+}
+
+/* Contenedor de Detalles JSON */
+.json-details {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  padding: 1.25rem;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+  font-family: 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #333;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+
+  code {
+    color: inherit;
+  }
+}
+
+/* Footer de Paginación */
+.pagination-footer {
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.875rem;
+  font-weight: 500;
+}

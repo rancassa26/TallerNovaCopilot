@@ -1,186 +1,75 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Patch,
-  Body,
-  Param,
-  Query,
-  HttpCode,
-  HttpStatus,
-  UseInterceptors,
-  UseGuards,
-} from '@nestjs/common';
-import { JwtGuard } from '../../../common/guards/jwt.guard';
-import { RolesGuard } from '../../../common/guards/roles.guard';
-import { CorrelationIdInterceptor } from '../../../common/interceptors/correlation-id.interceptor';
-import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor';
-import { CorrelationId, Roles } from '../../../common/decorators/index';
+import { Controller, Post, Body, UseGuards, UseInterceptors, Request, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 import { LoadReconciliationUseCase } from '../application/load-reconciliation.use-case';
 import { ValidateReconciliationUseCase } from '../application/validate-reconciliation.use-case';
-import { SearchAccountsUseCase } from '../application/search-accounts.use-case';
-import { GetAccountDetailUseCase } from '../application/get-account-detail.use-case';
-import { GetDashboardUseCase } from '../application/get-dashboard.use-case';
-import { GetIncidentsUseCase } from '../application/get-incidents.use-case';
-import { ExportResultsUseCase } from '../application/export-results.use-case';
-import { ResolveIncidentUseCase } from '../application/resolve-incident.use-case';
-import { LoadReconciliationDto } from './dtos/load-reconciliation.dto';
-import { ValidateReconciliationDto } from './dtos/validate-reconciliation.dto';
-import { ExportResultsDto } from './dtos/export-results.dto';
-import { ResolveIncidentDto } from './dtos/resolve-incident.dto';
+import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
+import { RolesGuard } from '../../auth/infrastructure/guards/roles.guard';
+import { Roles } from '../../auth/infrastructure/decorators/roles.decorator';
+import { UserRole } from '../../auth/domain/auth.enum';
+import { CorrelationIdInterceptor } from '../../../common/interceptors/correlation-id.interceptor';
+import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor';
+import { CorrelationId } from '../../../common/decorators/index';
 import { BaseResponseDTO } from '../../../common/dtos/base-response.dto';
+import { ValidateReconciliationDto } from './dtos/validate-reconciliation.dto';
 
-@Controller('reconciliation')
-@UseGuards(JwtGuard, RolesGuard)
+@ApiTags('Reconciliation')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
 @UseInterceptors(CorrelationIdInterceptor, ResponseInterceptor)
+@Controller('reconciliation')
 export class ReconciliationController {
   constructor(
-    private readonly loadReconciliationUseCase: LoadReconciliationUseCase,
-    private readonly validateReconciliationUseCase: ValidateReconciliationUseCase,
-    private readonly searchAccountsUseCase: SearchAccountsUseCase,
-    private readonly getAccountDetailUseCase: GetAccountDetailUseCase,
-    private readonly getDashboardUseCase: GetDashboardUseCase,
-    private readonly getIncidentsUseCase: GetIncidentsUseCase,
-    private readonly exportResultsUseCase: ExportResultsUseCase,
-    private readonly resolveIncidentUseCase: ResolveIncidentUseCase,
+    private readonly loadUseCase: LoadReconciliationUseCase,
+    private readonly validateUseCase: ValidateReconciliationUseCase,
   ) {}
 
-  @Roles('ADMIN')
+  /**
+   * Endpoint para cargar y validar un nuevo proceso de conciliación.
+   */
   @Post('load')
   @HttpCode(HttpStatus.CREATED)
-  async loadReconciliation(
-    @Body() body: LoadReconciliationDto,
+  @Roles(UserRole.ADMIN) // Solo administradores pueden cargar nuevas conciliaciones
+  @ApiOperation({ summary: 'Cargar un nuevo archivo de conciliación JSON' })
+  @ApiHeader({ name: 'X-Correlation-Id', description: 'ID de correlación para trazabilidad técnica' })
+  @ApiResponse({ status: 201, description: 'Conciliación cargada, validada y auditada con éxito.' })
+  @ApiResponse({ status: 400, description: 'Error en la estructura del JSON o datos inválidos.' })
+  @ApiResponse({ status: 403, description: 'Acceso denegado (Solo ADMIN).' })
+  async load(
+    @Body() data: any,
+    @Request() req: any,
     @CorrelationId() correlationId: string,
   ): Promise<BaseResponseDTO<any>> {
-    const result = await this.loadReconciliationUseCase.execute(body, correlationId);
+    // Extraemos el sub (ID de usuario) del token JWT decodificado por el Guard
+    const userId = req.user.sub;
+
+    const result = await this.loadUseCase.execute(data, userId, correlationId);
 
     return BaseResponseDTO.success(
-      'Reconciliation loaded successfully',
+      'Reconciliation loaded and validated successfully',
       result,
       correlationId,
-      HttpStatus.CREATED,
+      201,
     );
   }
 
-  @Roles('ADMIN')
+  /**
+   * Endpoint para ejecutar la validación de una conciliación ya cargada.
+   */
   @Post('validate')
   @HttpCode(HttpStatus.OK)
-  async validateReconciliation(
-    @Body() body: ValidateReconciliationDto,
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Validar una conciliación y generar incidentes' })
+  @ApiResponse({ status: 200, description: 'Validación ejecutada con éxito.' })
+  async validate(
+    @Body() dto: ValidateReconciliationDto,
+    @Request() req: any,
     @CorrelationId() correlationId: string,
   ): Promise<BaseResponseDTO<any>> {
-    const result = await this.validateReconciliationUseCase.execute(
-      body.reconciliationId,
-      correlationId,
-    );
+    const userId = req.user.sub;
+    const result = await this.validateUseCase.execute(dto.reconciliationId, userId, correlationId);
 
     return BaseResponseDTO.success(
-      'Reconciliation validation completed',
-      result,
-      correlationId,
-    );
-  }
-
-  @Roles('ADMIN', 'VIEWER')
-  @Get('accounts/search')
-  @HttpCode(HttpStatus.OK)
-  async searchAccounts(
-    @Query('q') query: string,
-    @CorrelationId() correlationId: string,
-  ): Promise<BaseResponseDTO<any>> {
-    const result = await this.searchAccountsUseCase.execute(query ?? '');
-
-    return BaseResponseDTO.success(
-      'Accounts retrieved successfully',
-      result,
-      correlationId,
-    );
-  }
-
-  @Roles('ADMIN', 'VIEWER')
-  @Get('accounts/:id')
-  @HttpCode(HttpStatus.OK)
-  async getAccountDetail(
-    @Param('id') accountId: string,
-    @CorrelationId() correlationId: string,
-  ): Promise<BaseResponseDTO<any>> {
-    const result = await this.getAccountDetailUseCase.execute(accountId, correlationId);
-
-    return BaseResponseDTO.success(
-      'Account detail retrieved successfully',
-      result,
-      correlationId,
-    );
-  }
-
-  @Roles('ADMIN', 'VIEWER')
-  @Get('dashboard')
-  @HttpCode(HttpStatus.OK)
-  async getDashboard(
-    @CorrelationId() correlationId: string,
-  ): Promise<BaseResponseDTO<any>> {
-    const result = await this.getDashboardUseCase.execute();
-
-    return BaseResponseDTO.success(
-      'Dashboard metrics retrieved successfully',
-      result,
-      correlationId,
-    );
-  }
-
-  @Roles('ADMIN', 'VIEWER')
-  @Get('incidents')
-  @HttpCode(HttpStatus.OK)
-  async getIncidents(
-    @Query('reconciliationId') reconciliationId?: string,
-    @Query('status') status?: string,
-    @CorrelationId() correlationId: string,
-  ): Promise<BaseResponseDTO<any>> {
-    const result = await this.getIncidentsUseCase.execute(reconciliationId, status);
-
-    return BaseResponseDTO.success(
-      'Incident list retrieved successfully',
-      result,
-      correlationId,
-    );
-  }
-
-  @Roles('ADMIN')
-  @Patch('incidents/:id/status')
-  @HttpCode(HttpStatus.OK)
-  async resolveIncident(
-    @Param('id') incidentId: string,
-    @Body() body: ResolveIncidentDto,
-    @CorrelationId() correlationId: string,
-  ): Promise<BaseResponseDTO<any>> {
-    const result = await this.resolveIncidentUseCase.execute(
-      incidentId,
-      body.status,
-      correlationId,
-    );
-
-    return BaseResponseDTO.success(
-      'Incident status updated successfully',
-      result,
-      correlationId,
-    );
-  }
-
-  @Roles('ADMIN')
-  @Get('export')
-  @HttpCode(HttpStatus.OK)
-  async exportResults(
-    @Query() query: ExportResultsDto,
-    @CorrelationId() correlationId: string,
-  ): Promise<BaseResponseDTO<any>> {
-    const result = await this.exportResultsUseCase.execute(
-      query.reconciliationId ?? null,
-      query.format ?? 'json',
-      correlationId,
-    );
-
-    return BaseResponseDTO.success(
-      'Export generated successfully',
+      'Validation process completed',
       result,
       correlationId,
     );

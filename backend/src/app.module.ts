@@ -9,9 +9,10 @@ import { GlobalExceptionFilter } from './common/filters/exception.filter';
 import { CorrelationIdInterceptor } from './common/interceptors/correlation-id.interceptor';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { LoggerService } from './common/logger/logger.service';
+import { AuditModule } from './modules/auth/presentation/audit.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), AuthModule, ReconciliationModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), AuthModule, ReconciliationModule, AuditModule],
   controllers: [],
   providers: [
     LoggerService,

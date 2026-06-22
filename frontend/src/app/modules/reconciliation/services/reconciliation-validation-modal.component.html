@@ -1,0 +1,74 @@
+<h2 mat-dialog-title>Detalles de Validación de Conciliación</h2>
+
+<mat-dialog-content class="mat-typography">
+  <div class="summary-section">
+    <p><strong>ID de Conciliación:</strong> {{ data.reconciliationId }}</p>
+    <p><strong>Fuente:</strong> {{ data.source }}</p>
+    <p><strong>Estado General:</strong> 
+      <span [ngClass]="{'status-valid': data.valid, 'status-invalid': !data.valid}">
+        {{ data.valid ? 'Válida' : 'Con Discrepancias' }}
+      </span>
+    </p>
+    <p><strong>Cuentas Validadas:</strong> {{ data.totalAccounts }}</p>
+    <p><strong>Diferencia Total:</strong> {{ data.totalDifference | currency:'USD':'symbol':'1.2-2' }}</p>
+  </div>
+
+  <mat-divider class="my-4"></mat-divider>
+
+  <h3>Desglose por Cuenta</h3>
+  <div class="mat-elevation-z2 table-container">
+    <table mat-table [dataSource]="validationsDataSource">
+
+      <!-- Account ID Column -->
+      <ng-container matColumnDef="accountId">
+        <th mat-header-cell *matHeaderCellDef> ID Cuenta </th>
+        <td mat-cell *matCellDef="let element"> {{ element.accountId }} </td>
+      </ng-container>
+
+      <!-- Account Name Column -->
+      <ng-container matColumnDef="accountName">
+        <th mat-header-cell *matHeaderCellDef> Nombre Cuenta </th>
+        <td mat-cell *matCellDef="let element"> {{ element.accountName }} </td>
+      </ng-container>
+
+      <!-- Ledger Balance Column -->
+      <ng-container matColumnDef="ledgerBalance">
+        <th mat-header-cell *matHeaderCellDef> Saldo Libro </th>
+        <td mat-cell *matCellDef="let element"> {{ element.ledgerBalance | currency:'USD':'symbol':'1.2-2' }} </td>
+      </ng-container>
+
+      <!-- System Balance Column -->
+      <ng-container matColumnDef="systemBalance">
+        <th mat-header-cell *matHeaderCellDef> Saldo Sistema </th>
+        <td mat-cell *matCellDef="let element"> {{ element.systemBalance | currency:'USD':'symbol':'1.2-2' }} </td>
+      </ng-container>
+
+      <!-- Difference Column -->
+      <ng-container matColumnDef="difference">
+        <th mat-header-cell *matHeaderCellDef> Diferencia </th>
+        <td mat-cell *matCellDef="let element" [class.text-danger]="element.difference !== 0"> {{ element.difference | currency:'USD':'symbol':'1.2-2' }} </td>
+      </ng-container>
+
+      <!-- Valid Column -->
+      <ng-container matColumnDef="valid">
+        <th mat-header-cell *matHeaderCellDef> Válida </th>
+        <td mat-cell *matCellDef="let element">
+          <mat-icon [color]="element.valid ? 'primary' : 'warn'">{{ element.valid ? 'check_circle' : 'error' }}</mat-icon>
+        </td>
+      </ng-container>
+
+      <!-- Issues Column -->
+      <ng-container matColumnDef="issues">
+        <th mat-header-cell *matHeaderCellDef> Problemas </th>
+        <td mat-cell *matCellDef="let element"> {{ element.issues.join(', ') || 'Ninguno' }} </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close (click)="onClose()">Cerrar</button>
+</mat-dialog-actions>

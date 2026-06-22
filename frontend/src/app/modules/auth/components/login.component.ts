@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoggerService } from '../../../core/services/logger.service';
+import { finalize } from 'rxjs/operators';
 
 /**
  * LoginComponent - Smart component for user authentication
@@ -54,13 +55,14 @@ export class LoginComponent implements OnInit {
 
     this.authService
       .login(this.loginForm.value.email, this.loginForm.value.password)
+      .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: () => {
-          this.logger.log('Login successful, redirecting...');
-          this.router.navigateByUrl(this.returnUrl);
+          const redirect = this.returnUrl === '/' ? '/reconciliation/dashboard' : this.returnUrl;
+          this.logger.log(`Login successful, redirecting to ${redirect}`);
+          this.router.navigateByUrl(redirect);
         },
         error: (error) => {
-          this.loading = false;
           this.error = error?.message || 'Login failed';
           this.logger.error('Login failed', undefined, { error });
         },

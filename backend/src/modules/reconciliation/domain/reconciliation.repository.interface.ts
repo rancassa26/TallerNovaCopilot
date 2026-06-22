@@ -1,11 +1,7 @@
-import { Reconciliation } from './reconciliation.entity';
-import { Account } from './account.entity';
-
+/**
+ * IReconciliationRepository - Interfaz de Dominio
+ * Define las operaciones de persistencia para los datos de conciliación.
+ */
 export interface IReconciliationRepository {
-  create(reconciliation: Reconciliation): Promise<Reconciliation>;
-  findById(id: string): Promise<Reconciliation | null>;
-  findAll(): Promise<Reconciliation[]>;
-  findAccountById(accountId: string): Promise<Account | null>;
-  searchAccounts(query: string): Promise<Account[]>;
-  listAllAccounts(): Promise<Account[]>;
+  save(data: any): Promise<any>;
 }

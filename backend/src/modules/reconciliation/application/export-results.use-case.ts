@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { IReconciliationRepository } from '../domain/reconciliation.repository.interface';
 import { NotFoundException, ValidationException } from '../../../common/exceptions/base.exception';
+import { AuditUseCase } from '../../auth/presentation/audit.use-case';
 
 export type ExportFormat = 'json' | 'csv';
 
@@ -15,11 +16,13 @@ export class ExportResultsUseCase {
   constructor(
     @Inject('IReconciliationRepository')
     private readonly reconciliationRepository: IReconciliationRepository,
+    private readonly auditUseCase: AuditUseCase,
   ) {}
 
   async execute(
     reconciliationId: string | null,
     format: string,
+    userId: string,
     correlationId: string,
   ): Promise<ExportResult> {
     const normalizedFormat = (format ?? 'json').toLowerCase();
@@ -65,6 +68,18 @@ export class ExportResultsUseCase {
       normalizedFormat === 'json'
         ? JSON.stringify(payload, null, 2)
         : this.toCsv(payload);
+
+    // Registrar auditoría de la exportación
+    await this.auditUseCase.execute(
+      userId,
+      'RECONCILIATION_EXPORTED',
+      { 
+        reconciliationId, 
+        format: normalizedFormat,
+        reconciliationsCount: reconciliations.length 
+      },
+      correlationId
+    );
 
     return {
       filename,

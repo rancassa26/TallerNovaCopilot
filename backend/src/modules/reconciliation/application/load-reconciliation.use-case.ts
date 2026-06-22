@@ -1,8 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { IReconciliationRepository } from '../domain/reconciliation.repository.interface';
 import { LoggerService } from '../../../common/logger/logger.service';
 import { SchemaValidatorService } from '../infrastructure/schema-validator.service';
 import { RECONCILIATION_SCHEMA } from '../domain/schemas/reconciliation.schema';
-import { IReconciliationRepository } from '../domain/reconciliation.repository.interface';
+import { AuditUseCase } from '../../auth/application/audit.use-case';
 
 @Injectable()
 export class LoadReconciliationUseCase {
@@ -11,22 +12,37 @@ export class LoadReconciliationUseCase {
     private readonly reconciliationRepository: IReconciliationRepository,
     private readonly schemaValidator: SchemaValidatorService,
     private readonly logger: LoggerService,
+    private readonly auditUseCase: AuditUseCase,
   ) {}
 
-  async execute(data: any, correlationId: string): Promise<any> {
-    this.logger.log('Starting LoadReconciliationUseCase validation', correlationId);
+  /**
+   * Ejecuta el proceso de carga, validación y auditoría de una conciliación.
+   */
+  async execute(data: any, userId: string, correlationId: string): Promise<any> {
+    this.logger.log('Iniciando validación de LoadReconciliationUseCase', correlationId);
 
-    // 1. Validar integridad estructural con JSON Schema
+    // 1. Validación Estructural
     this.schemaValidator.validate(RECONCILIATION_SCHEMA, data, correlationId);
 
-    this.logger.log('JSON Schema validation passed', correlationId);
+    this.logger.log('Validación de esquema JSON exitosa', correlationId);
 
-    // 2. Lógica de persistencia (Simulada para este paso)
-    // Aquí se transformaría el DTO a Entidad de Dominio y se guardaría
+    // 2. Persistencia
     const result = await this.reconciliationRepository.save(data);
 
-    this.logger.log(`Reconciliation from ${data.source} loaded successfully`, correlationId);
+    this.logger.log(`Conciliación de fuente "${data.source}" cargada con éxito`, correlationId);
     
+    // 3. Registro de Auditoría
+    await this.auditUseCase.execute(
+      userId,
+      'RECONCILIATION_LOADED',
+      { 
+        source: data.source || 'unknown', 
+        accountsCount: data.accounts?.length || 0,
+        resultId: result?.id 
+      },
+      correlationId
+    );
+
     return result;
   }
 }

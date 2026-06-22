@@ -7,10 +7,12 @@ import { JwtStrategy } from '../../common/strategies/jwt.strategy';
 import { JwtTokenService } from './infrastructure/jwt-token.service';
 import { InMemoryUserRepository } from './infrastructure/in-memory-user.repository';
 import { LoggerService } from '../../common/logger/logger.service';
+import { AuditModule } from './presentation/audit.module';
 
 @Module({
   imports: [
     PassportModule,
+    AuditModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'your-secret-key',
       signOptions: { expiresIn: (process.env.JWT_EXPIRATION ?? '24h') as any },

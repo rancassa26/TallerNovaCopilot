@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Body,
+  Request,
   HttpCode,
   HttpStatus,
   UseGuards,
@@ -39,6 +40,30 @@ export class AuthController {
 
     return BaseResponseDTO.success(
       'Login successful',
+      {
+        token: result.token,
+        user: {
+          id: result.user.id,
+          email: result.user.email,
+          roles: result.user.roles,
+        },
+      },
+      correlationId,
+      200,
+    );
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(
+    @Request() req: any,
+    @CorrelationId() correlationId: string,
+  ): Promise<BaseResponseDTO<LoginResponseDto>> {
+    const userId = req.user.sub;
+    const result = await this.authService.refreshToken(userId, correlationId);
+
+    return BaseResponseDTO.success(
+      'Token refreshed successfully',
       {
         token: result.token,
         user: {

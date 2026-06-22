@@ -1,0 +1,17 @@
+<div *ngIf="toast$ | async as toast" class="toast-overlay">
+  <div class="toast-message" [ngClass]="'toast-' + toast.type">
+    <div class="toast-icon">
+      <i class="bi bi-exclamation-triangle-fill" *ngIf="toast.type === 'warning'"></i>
+      <i class="bi bi-check-circle-fill" *ngIf="toast.type === 'success'"></i>
+      <i class="bi bi-info-circle-fill" *ngIf="toast.type === 'info'"></i>
+      <i class="bi bi-x-circle-fill" *ngIf="toast.type === 'error'"></i>
+    </div>
+    <div class="toast-text">{{ toast.message }}</div>
+    <div class="toast-actions" *ngIf="toast.action">
+      <button class="btn-action" (click)="handleAction(toast.action.callback)">
+        {{ toast.action.label }}
+      </button>
+    </div>
+    <button class="toast-close" (click)="close()">&times;</button>
+  </div>
+</div>
